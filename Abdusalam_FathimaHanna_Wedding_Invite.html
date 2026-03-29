@@ -1539,15 +1539,99 @@
         grid-template-columns: 1fr;
       }
     }
+
+    /* ═══════════════════════════
+       INTRO OVERLAY
+    ═══════════════════════════ */
+    .intro-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 1.2s cubic-bezier(0.22, 1, 0.36, 1), transform 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    
+    .intro-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(201,168,76,0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
+    .intro-overlay.hidden {
+      opacity: 0;
+      transform: translateY(-100vh);
+      pointer-events: none;
+    }
+    
+    .intro-content {
+      position: relative;
+      text-align: center;
+      padding: clamp(40px, 8vw, 60px);
+      border: 1px solid rgba(201,168,76,0.3);
+      background: rgba(17,10,2,0.8);
+      max-width: 90%;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(201,168,76,0.05);
+      backdrop-filter: blur(10px);
+    }
+    
+    .intro-bismillah {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      color: var(--gold-dark);
+      margin-bottom: 20px;
+    }
+    
+    .intro-names {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      color: var(--gold-light);
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+    
+    .open-btn {
+      background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-dark));
+      background-size: 200% 100%;
+      color: var(--dark);
+      border: none;
+      padding: 16px 36px;
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+      transition: all 0.4s ease;
+    }
+    
+    .open-btn:hover {
+      background-position: left;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(201,168,76,0.5);
+    }
   </style>
 </head>
 
 <body>
 
+  <!-- Intro Overlay -->
+  <div class="intro-overlay" id="introOverlay">
+    <div class="intro-content">
+      <p class="intro-bismillah">بِسْمِ ٱللَّٰهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</p>
+      <h1 class="intro-names">Abdusalam & Fathima Hanna</h1>
+      <button class="open-btn" id="openBtn">Open Invitation ✦</button>
+    </div>
+  </div>
+
   <!-- Audio Player -->
   <audio id="bgMusic" loop preload="auto">
-    <!-- Beautiful, soft acoustic ambient loop -->
-    <source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=ambient-piano-amp-strings-10711.mp3" type="audio/mpeg">
+    <!-- Classic Arabic Nasheed/Melody Vibe -->
+    <source src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_65089e5fc8.mp3?filename=arab-atmosphere-11029.mp3" type="audio/mpeg">
   </audio>
 
   <!-- Floating Toggles -->
@@ -1955,16 +2039,36 @@
         isPlaying = !isPlaying;
       });
       
-      // Auto-play attempt on first interaction with the document
-      document.body.addEventListener('click', () => {
+      function playMusic() {
         if (!isPlaying) {
           bgMusic.play().then(() => {
             isPlaying = true;
             iconOff.style.display = 'none';
             iconOn.style.display = 'block';
-          }).catch(e => {}); 
+          }).catch(e => console.log('Audio error:', e));
         }
-      }, { once: true });
+      }
+
+      // Auto-play attempt on first interaction with the document
+      document.body.addEventListener('click', playMusic, { once: true });
+
+      // Intro Overlay Logic
+      document.body.style.overflow = 'hidden'; // Lock scroll initially
+      const introOverlay = document.getElementById('introOverlay');
+      const openBtn = document.getElementById('openBtn');
+      if (openBtn) {
+        openBtn.addEventListener('click', (e) => {
+          e.stopPropagation(); // Prevent double triggering body click
+          playMusic();
+          introOverlay.classList.add('hidden');
+          setTimeout(() => {
+            introOverlay.style.display = 'none';
+            document.body.style.overflow = ''; // Unlock scroll
+            // Gentle auto-scroll effect down to reveal the content
+            window.scrollBy({ top: window.innerHeight * 0.2, behavior: 'smooth' });
+          }, 1200);
+        });
+      }
     })();
 
     // ── Starfield
